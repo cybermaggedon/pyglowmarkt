@@ -6,6 +6,12 @@
 Python API to the Bright/Glowmarkt/Hildebrand API for energy consumption.
 There is a python API and a command-line script.
 
+## Install
+
+```
+pip3 install pyglowmarkt
+```
+
 ## API example usage
 
 ### Connect
