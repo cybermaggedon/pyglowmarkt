@@ -10,6 +10,8 @@ There is a python API and a command-line script.
 
 ### Connect
 
+You need an account from https://glowmarkt.com/
+
 ```
 from glowmarkt import *
 
