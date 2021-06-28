@@ -61,6 +61,16 @@ for r in rdgs:
     ))
 ```
 
+### Tariff
+
+```
+t = res.get_tariff()
+print("    Tariff: rate=%.1f standing=%.1f" % (
+    t.current_rates.rate,
+    t.current_rates.standing_charge,
+))
+```
+
 ### Not implemented / tested
 
 The API provides the means to get the current value of a resource (the last
@@ -72,6 +82,45 @@ Glowmarkt hardware (I'm testing with a SMETS2 meter).
 
 I don't have a gas smart meter, maybe it would work, maybe not.
 
+## Command line
 
+```
+usage: glowmarkt-dump [-h] --username USERNAME --password PASSWORD
+                      [--minutes MINUTES] [--period PERIOD]
 
+optional arguments:
+  -h, --help            show this help message and exit
+  --username USERNAME, -u USERNAME
+                        Bright account username
+  --password PASSWORD, -p PASSWORD
+                        Bright account password
+  --minutes MINUTES, -m MINUTES
+                        Number of minutes to look back
+  --period PERIOD, -d PERIOD
+                        Summary period (default: PT1H)
+```
 
+e.g.
+
+```
+$ glowmarkt-dump -u 'username@example.org' -p 'p4ssw0rd' -m 240 -d PT1H
+Entity: DCC Sourced
+  electricity consumption:
+    2021-06-28 16:00:00: 0.000000 kWh
+    2021-06-28 17:00:00: 0.506000 kWh
+    2021-06-28 18:00:00: 2.355000 kWh
+    2021-06-28 19:00:00: 0.282000 kWh
+    2021-06-28 20:00:00: 0.000000 kWh
+    current: Not implemented.
+    meter reading: Not implemented.
+    Tariff: rate=16.3 standing=28.8
+  electricity cost:
+    2021-06-28 16:00:00: 0.000000 p
+    2021-06-28 17:00:00: 8.257920 p
+    2021-06-28 18:00:00: 38.433600 p
+    2021-06-28 19:00:00: 4.602240 p
+    2021-06-28 20:00:00: 0.000000 p
+    current: Not implemented.
+    meter reading: Not implemented.
+    Tariff: rate=16.3 standing=28.8
+```
