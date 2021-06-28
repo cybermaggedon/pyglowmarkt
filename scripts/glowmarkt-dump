@@ -65,7 +65,7 @@ try:
                 print("    meter reading: %s" % str(e))
                 
             t = res.get_tariff()
-            print("    Tariff: rate=%.1f standing=%.1f" % (
+            print("    Tariff: rate=%s standing=%s" % (
                 t.current_rates.rate,
                 t.current_rates.standing_charge,
             ))

@@ -18,13 +18,13 @@ class Pence:
     def __init__(self, value):
         self.value = value
     def __str__(self):
-        return "%f p" % self.value
+        return "%.2f p" % self.value
 
 class KWH:
     def __init__(self, value):
         self.value = value
     def __str__(self):
-        return "%f kWh" % self.value
+        return "%.3f kWh" % self.value
 
 class VirtualEntity:
     def get_resources(self):
@@ -318,8 +318,8 @@ class BrightClient:
             t.type = elt["type"]
 
             rt = Rate()
-            rt.rate = elt["currentRates"]["rate"]
-            rt.standing_charge = elt["currentRates"]["standingCharge"]
+            rt.rate = Pence(elt["currentRates"]["rate"])
+            rt.standing_charge = Pence(elt["currentRates"]["standingCharge"])
             rt.tier = None
             
             t.current_rates = rt
