@@ -19,12 +19,24 @@ class Pence:
         self.value = value
     def __str__(self):
         return "%.2f p" % self.value
+    def unit(self):
+        return "pence"
 
 class KWH:
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return "%.3f kWh" % self.value
+    def unit(self):
+        return "kWh"
+
+class Unknown:
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "%s" % self.valu
+    def unit(self):
+        return "unknown"
 
 class VirtualEntity:
     def get_resources(self):
@@ -207,7 +219,7 @@ class BrightClient:
         elif resp["units"] == "kWh":
             cls = KWH
         else:
-            cls = Object
+            cls = Unknown
 
         return [
             [datetime.datetime.fromtimestamp(v[0], tz = utc), cls(v[1])]
@@ -245,7 +257,7 @@ class BrightClient:
         elif resp["units"] == "kWh":
             cls = KWH
         else:
-            cls = Object
+            cls = Unknown
 
         return [
             [datetime.datetime.fromtimestamp(v[0], tz = utc), cls(v[1])]
@@ -283,7 +295,7 @@ class BrightClient:
         elif resp["units"] == "kWh":
             cls = KWH
         else:
-            cls = Object
+            cls = Unknown
 
         return [
             [datetime.datetime.fromtimestamp(v[0], tz = utc), cls(v[1])]

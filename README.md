@@ -92,6 +92,11 @@ I don't have a gas smart meter, maybe it would work, maybe not.
 
 ## Command line
 
+### `glowmarkt-dump`
+
+Accesses the bright account and dumps out each resource's readings, and
+tariff information, human readable.
+
 ```
 usage: glowmarkt-dump [-h] --username USERNAME --password PASSWORD
                       [--minutes MINUTES] [--period PERIOD]
@@ -131,4 +136,50 @@ Entity: DCC Sourced
     current: Not implemented.
     meter reading: Not implemented.
     Tariff: rate=16.3 standing=28.8
+```
+
+### `glowmarkt-csv`
+
+Accesses the readings for all resources with a particular classifier
+and writes out readings in CSV format.  Would be used with e.g.
+- `electricity.consumption`
+- `electricity.consumption.cost`
+- `gas.consumption`
+- `gas.consumption.cost`
+
+```
+usage: glowmarkt-csv [-h] --username USERNAME --password PASSWORD
+                     [--classifier CLASSIFIER] [--minutes MINUTES]
+                     [--period PERIOD] [--no-header]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --username USERNAME, -u USERNAME
+                        Bright account username
+  --password PASSWORD, -p PASSWORD
+                        Bright account password
+  --classifier CLASSIFIER, -c CLASSIFIER
+                        Resource classifier to use (default:
+                        electricity.consumption)
+  --minutes MINUTES, -m MINUTES
+                        Number of minutes to look back
+  --period PERIOD, -d PERIOD
+                        Summary period (default: PT1H)
+  --no-header, -n       Suppress CSV header
+```
+
+e.g.
+
+```
+$ scripts/glowmarkt-csv  -u 'username@example.org' -p 'p4ssw0rd' \
+    -m 240 -d PT30M -c electricity.consumption.cost
+entity,resource,time,value,unit
+DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T06:30:00,2.59488,pence
+DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T07:00:00,1.82784,pence
+DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T07:30:00,2.1216,pence
+DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T08:00:00,2.31744,pence
+DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T08:30:00,11.21184,pence
+DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T09:00:00,3.1008,pence
+DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T09:30:00,0,pence
+DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T10:00:00,0,pence
 ```

@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyglowmarkt",
-    version="0.1",
+    version="0.2",
     author="Cybermaggedon",
     author_email="mark@cyberapocalypse.co.uk",
     description="Python API for accessing Hildebrand/Glowmarkt/Bright API to smart meter data",
@@ -25,5 +25,6 @@ setuptools.setup(
     ],
     scripts=[
         "scripts/glowmarkt-dump",
+        "scripts/glowmarkt-csv",
     ]
 )

@@ -4,6 +4,7 @@ from glowmarkt import *
 import datetime
 import sys
 import argparse
+import csv
 
 try:
 
@@ -16,13 +17,18 @@ try:
     parser.add_argument('--password', '-p',
                         required=True,
                         help="Bright account password")
+    parser.add_argument('--classifier', '-c',
+                        default="electricity.consumption",
+                        help="Resource classifier to use (default: electricity.consumption)")
     parser.add_argument('--minutes', '-m',
                         default=240,
                         help="Number of minutes to look back")
     parser.add_argument('--period', '-d',
                         default="PT30M",
                         help="Summary period (default: PT1H)")
-
+    parser.add_argument('--no-header', '-n',
+                        action="store_const", const=True,
+                        help="Suppress CSV header")
 
     # Parse arguments
     args = parser.parse_args(sys.argv[1:])
@@ -30,10 +36,19 @@ try:
     cli = BrightClient(args.username, args.password)
     ents = cli.get_virtual_entities()
 
+    rows = []
+
+    if not args.no_header:
+        rows.append([
+            "entity", "resource", "time", "value", "unit"
+        ])
+
     for ent in ents:
-        print("Entity:", ent.name)
+
         for res in ent.get_resources():
-            print("  %s:" % res.name)
+
+            if res.classifier != args.classifier:
+                continue
 
             now = datetime.datetime.now()
             t_from = now - datetime.timedelta(minutes=int(args.minutes))
@@ -41,34 +56,24 @@ try:
 
             rdgs = res.get_readings(t_from, t_to, args.period)
             for r in rdgs:
-                print("    %s: %s" % (
-                    r[0].astimezone().replace(tzinfo=None),
-                    r[1]
-                ))
 
-            try:
-                 cur = res.get_current()
-                 print("    current (%s): %s" % (
-                     cur[0].astimezone().replace(tzinfo=None),
-                     cur[1]
-                 ))
-            except Exception as e:
-                print("    current: %s" % str(e))
+                tm = r[0].astimezone().replace(tzinfo=None).isoformat()
+                value = r[1].value
+                unit = r[1].unit()
 
-            try:
-                 cur = res.get_meter_reading()
-                 print("    meter (%s): %s" % (
-                     cur[0].astimezone().replace(tzinfo=None),
-                     cur[1]
-                 ))
-            except Exception as e:
-                print("    meter reading: %s" % str(e))
-                
-            t = res.get_tariff()
-            print("    Tariff: rate=%s standing=%s" % (
-                t.current_rates.rate,
-                t.current_rates.standing_charge,
-            ))
+                row = [
+                    ent.name,
+                    res.id,
+                    tm,
+                    value,
+                    unit
+                ]
+
+                rows.append(row)
+
+    writer = csv.writer(sys.stdout, quoting=csv.QUOTE_MINIMAL)
+    for row in rows:
+        writer.writerow(row)
 
 except Exception as e:
     print(e)
