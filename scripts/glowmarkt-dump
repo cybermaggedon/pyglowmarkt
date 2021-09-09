@@ -35,7 +35,7 @@ try:
         for res in ent.get_resources():
             print("  %s:" % res.name)
 
-            now = datetime.datetime.now()
+            now = datetime.datetime.now(datetime.timezone.utc)
             t_from = now - datetime.timedelta(minutes=int(args.minutes))
             t_to = now
 
