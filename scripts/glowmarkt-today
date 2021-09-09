@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+
+from glowmarkt import *
+import datetime
+import sys
+import argparse
+
+try:
+
+    parser = argparse.ArgumentParser(
+        description=__doc__
+    )
+    parser.add_argument('--username', '-u',
+                        required=True,
+                        help="Bright account username")
+    parser.add_argument('--password', '-p',
+                        required=True,
+                        help="Bright account password")
+    parser.add_argument('--classifier', '-c',
+                        default="electricity.consumption",
+                        help="Resource classifier to use (default: electricity.consumption)")
+
+    # Parse arguments
+    args = parser.parse_args(sys.argv[1:])
+
+    cli = BrightClient(args.username, args.password)
+    ents = cli.get_virtual_entities()
+
+    rows = []
+
+    for ent in ents:
+
+        for res in ent.get_resources():
+
+            if res.classifier != args.classifier:
+                continue
+
+            now = datetime.datetime.now(datetime.timezone.utc)
+
+            t_from = now.replace(second=0, microsecond=0, minute=0, hour=0)
+            t_to = now
+
+            rdgs = res.get_readings(t_from, t_to, "PT30M")
+
+            tot = 0
+            for r in rdgs:
+                tot += r[1].value
+
+            print(tot)
+            
+except Exception as e:
+    print(e)
+

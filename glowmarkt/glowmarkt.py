@@ -183,21 +183,25 @@ class BrightClient:
         if period == "PT30M":
             rounding = 30 * 60
         elif period == "PT1H":
-            rounding = 60 * 60
+            rounding = 30 * 60
         elif period == "P1D":
-            rounding = 60 * 60
+            rounding = 24 * 60 * 60
         elif period == "P1W":
-            rounding = 60 * 60
-        elif period == "PT1M":
-            rounding = 60 * 60
+            rounding = 7 * 24 * 60 * 60
+        elif period == "P1M":
+            # Month isn't precise.
+            rounding = 31 * 24 * 60 * 60
         else:
-            raise RuntimeError("Period %s not known" % args.period)
+            raise RuntimeError("Period %s not known" % period)
 
         from_delta = (time.mktime(t_from.timetuple()) % rounding)
         to_delta = (time.mktime(t_to.timetuple()) % rounding)
 
         t_from -= datetime.timedelta(seconds=from_delta)
         t_to -= datetime.timedelta(seconds=to_delta)
+
+        # And top out at previous period
+        t_to -= datetime.timedelta(seconds=rounding)
 
         headers = {
             "Content-Type": "application/json",
