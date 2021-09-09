@@ -50,7 +50,7 @@ try:
             if res.classifier != args.classifier:
                 continue
 
-            now = datetime.datetime.now()
+            now = datetime.datetime.now(datetime.timezone.utc)
             t_from = now - datetime.timedelta(minutes=int(args.minutes))
             t_to = now
 
@@ -77,6 +77,4 @@ try:
 
 except Exception as e:
     print(e)
-
-    raise e
 

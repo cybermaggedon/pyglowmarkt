@@ -2,6 +2,7 @@
 import requests
 import json
 import datetime
+import time
 
 PT1M = "PT1M"
 PT30M = "PT30M"
@@ -175,6 +176,29 @@ class BrightClient:
     def get_readings(self, resource, t_from, t_to, period, offset=0,
                      func="sum"):
 
+        # Work out a rounding value.  Readings seem to be more accurate if
+        # rounded to the near thing...
+        if period == "PT1M":
+            rounding = 60
+        if period == "PT30M":
+            rounding = 30 * 60
+        elif period == "PT1H":
+            rounding = 60 * 60
+        elif period == "P1D":
+            rounding = 60 * 60
+        elif period == "P1W":
+            rounding = 60 * 60
+        elif period == "PT1M":
+            rounding = 60 * 60
+        else:
+            raise RuntimeError("Period %s not known" % args.period)
+
+        from_delta = (time.mktime(t_from.timetuple()) % rounding)
+        to_delta = (time.mktime(t_to.timetuple()) % rounding)
+
+        t_from -= datetime.timedelta(seconds=from_delta)
+        t_to -= datetime.timedelta(seconds=to_delta)
+
         headers = {
             "Content-Type": "application/json",
             "applicationId": self.application,
@@ -247,7 +271,6 @@ class BrightClient:
             raise RuntimeError("Request failed")
 
         resp = resp.json()
-        print(resp)
 
         if len(resp["data"]) < 1:
             raise RuntimeError("Current reading not returned")
@@ -285,7 +308,6 @@ class BrightClient:
             raise RuntimeError("Request failed")
 
         resp = resp.json()
-        print(resp)
 
         if len(resp["data"]) < 1:
             raise RuntimeError("Meter reading not returned")
