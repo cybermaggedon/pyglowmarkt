@@ -183,3 +183,37 @@ DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T09:00:00,3.1008,penc
 DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T09:30:00,0,pence
 DCC Sourced,121d3e6d-ccea-4b46-8b37-798d5cd880b3,2021-06-29T10:00:00,0,pence
 ```
+
+### `glowmarkt-today`
+
+Shows cumulative consumption for today (since midnight local time).
+
+Accesses the readings for all resources with a particular classifier
+and writes out readings in CSV format.  Would be used with e.g.
+- `electricity.consumption`
+- `electricity.consumption.cost`
+- `gas.consumption`
+- `gas.consumption.cost`
+
+```
+usage: glowmarkt-today [-h] --username USERNAME --password PASSWORD
+                       [--classifier CLASSIFIER]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --username USERNAME, -u USERNAME
+                        Bright account username
+  --password PASSWORD, -p PASSWORD
+                        Bright account password
+  --classifier CLASSIFIER, -c CLASSIFIER
+                        Resource classifier to use (default:
+                        electricity.consumption)
+```
+
+e.g.
+
+```
+$ scripts/glowmarkt-today  -u 'username@example.org' -p 'p4ssw0rd' \
+    -c electricity.consumption
+3.998
+```
