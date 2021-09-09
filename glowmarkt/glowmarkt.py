@@ -57,6 +57,8 @@ class Resource:
         return self.client.get_tariff(self.id)
     def round(self, when, period):
         return self.client.round(when, period)
+    def catchup(self):
+        return self.client.catchup(self.id)
 
 class BrightClient:
     def __init__(self, username, password):
@@ -264,7 +266,6 @@ class BrightClient:
     def get_current(self, resource):
 
         # Tried it against the API, no data is returned
-        raise RuntimeError("Not implemented.")
 
         headers = {
             "Content-Type": "application/json",
@@ -279,6 +280,7 @@ class BrightClient:
         resp = self.session.get(url, headers=headers)
 
         if resp.status_code != 200:
+            print(resp.text)
             raise RuntimeError("Request failed")
 
         resp = resp.json()
@@ -293,10 +295,34 @@ class BrightClient:
         else:
             cls = Unknown
 
+        print(datetime.datetime.fromtimestamp(resp["data"][0][0]))
+
         return [
-            [datetime.datetime.fromtimestamp(v[0], tz = utc), cls(v[1])]
-            for v in resp["data"]
+            datetime.datetime.fromtimestamp(resp["data"][0][0]).astimezone(),
+            cls(resp["data"][0][1])
         ]
+
+    def catchup(self, resource):
+
+        # Tried it against the API, no data is returned
+
+        headers = {
+            "Content-Type": "application/json",
+            "applicationId": self.application,
+            "token": self.token
+        }
+
+        url = self.url + "resource/" + resource + "/catchup"
+
+        resp = self.session.get(url, headers=headers)
+
+        if resp.status_code != 200:
+            print(resp.text)
+            raise RuntimeError("Request failed")
+
+        resp = resp.json()
+
+        return resp
 
     def get_meter_reading(self, resource):
 
