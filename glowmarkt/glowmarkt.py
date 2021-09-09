@@ -47,15 +47,16 @@ class Tariff:
     pass
 
 class Resource:
-    def get_readings(self, t_from, t_to, period, offset=0, func="sum"):
-        return self.client.get_readings(self.id, t_from, t_to, period, offset,
-                                        func)
+    def get_readings(self, t_from, t_to, period, func="sum"):
+        return self.client.get_readings(self.id, t_from, t_to, period, func)
     def get_current(self):
         return self.client.get_current(self.id)
     def get_meter_reading(self):
         return self.client.get_meter_reading(self.id)
     def get_tariff(self):
         return self.client.get_tariff(self.id)
+    def round(self, when, period):
+        return self.client.round(when, period)
 
 class BrightClient:
     def __init__(self, username, password):
@@ -173,35 +174,38 @@ class BrightClient:
             
         return resources
 
-    def get_readings(self, resource, t_from, t_to, period, offset=0,
-                     func="sum"):
+    def round(self, when, period):
 
         # Work out a rounding value.  Readings seem to be more accurate if
         # rounded to the near thing...
         if period == "PT1M":
-            rounding = 60
+            when = when.replace(second=0, microsecond=0)
         if period == "PT30M":
-            rounding = 30 * 60
+            when = when.replace(minute=int(when.minute / 30),
+                                second=0,
+                                microsecond=0)
         elif period == "PT1H":
-            rounding = 30 * 60
+            when = when.replace(minute=0,
+                                second=0,
+                                microsecond=0)
         elif period == "P1D":
-            rounding = 24 * 60 * 60
+            when = when.replace(hour=0, minute=0,
+                                second=0,
+                                microsecond=0)
         elif period == "P1W":
-            rounding = 7 * 24 * 60 * 60
+            when = when.replace(hour=0, minute=0,
+                                second=0,
+                                microsecond=0)
         elif period == "P1M":
-            # Month isn't precise.
-            rounding = 31 * 24 * 60 * 60
+            when = when.replace(day=1, hour=0, minute=0,
+                                second=0,
+                                microsecond=0)
         else:
             raise RuntimeError("Period %s not known" % period)
 
-        from_delta = (time.mktime(t_from.timetuple()) % rounding)
-        to_delta = (time.mktime(t_to.timetuple()) % rounding)
+        return when
 
-        t_from -= datetime.timedelta(seconds=from_delta)
-        t_to -= datetime.timedelta(seconds=to_delta)
-
-        # And top out at previous period
-        t_to -= datetime.timedelta(seconds=rounding)
+    def get_readings(self, resource, t_from, t_to, period, func="sum"):
 
         headers = {
             "Content-Type": "application/json",
@@ -211,13 +215,15 @@ class BrightClient:
 
         utc = datetime.timezone.utc
 
+        # Offset in minutes
+        offset = -t_from.utcoffset().seconds / 60
+
         def time_string(x):
             if isinstance(x, datetime.datetime):
-                x = x.replace(microsecond=0)
-                x = x.astimezone(utc).replace(tzinfo=None)
+                x = x.replace(tzinfo=None)
                 return x.isoformat()
             elif isinstance(x, datetime.date):
-                x = x.astimezone(utc).replace(tzinfo=None)
+                x = x.replace(tzinfo=None)
                 return x.isoformat()
             else:
                 raise RuntimeError("to_from/t_to should be date/datetime")
@@ -250,7 +256,8 @@ class BrightClient:
             cls = Unknown
 
         return [
-            [datetime.datetime.fromtimestamp(v[0], tz = utc), cls(v[1])]
+            [datetime.datetime.fromtimestamp(v[0] + 60 * offset).astimezone(),
+             cls(v[1])]
             for v in resp["data"]
         ]
 

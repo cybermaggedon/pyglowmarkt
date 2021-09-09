@@ -35,10 +35,10 @@ try:
             if res.classifier != args.classifier:
                 continue
 
-            now = datetime.datetime.now(datetime.timezone.utc)
-
-            t_from = now.replace(second=0, microsecond=0, minute=0, hour=0)
-            t_to = now
+            # Work out period from start of day to now.
+            now = datetime.datetime.now().astimezone()
+            t_to = res.round(now, "PT30M")
+            t_from = t_to.replace(second=0, microsecond=0, minute=0, hour=0)
 
             rdgs = res.get_readings(t_from, t_to, "PT30M")
 

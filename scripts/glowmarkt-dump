@@ -35,9 +35,9 @@ try:
         for res in ent.get_resources():
             print("  %s:" % res.name)
 
-            now = datetime.datetime.now(datetime.timezone.utc)
-            t_from = now - datetime.timedelta(minutes=int(args.minutes))
-            t_to = now
+            now = datetime.datetime.now().astimezone()
+            t_to = res.round(now, args.period)
+            t_from = t_to - datetime.timedelta(minutes=int(args.minutes))
 
             rdgs = res.get_readings(t_from, t_to, args.period)
             for r in rdgs:

@@ -50,14 +50,16 @@ try:
             if res.classifier != args.classifier:
                 continue
 
-            now = datetime.datetime.now(datetime.timezone.utc)
-            t_from = now - datetime.timedelta(minutes=int(args.minutes))
-            t_to = now
+            now = datetime.datetime.now().astimezone()
+            t_to = res.round(now, args.period)
+            t_from = t_to - datetime.timedelta(minutes=int(args.minutes))
 
             rdgs = res.get_readings(t_from, t_to, args.period)
             for r in rdgs:
 
-                tm = r[0].astimezone().replace(tzinfo=None).isoformat()
+                tm = r[0].replace(tzinfo=None).isoformat()
+
+                # FIXME, rmeove?
                 value = r[1].value
                 unit = r[1].unit()
 

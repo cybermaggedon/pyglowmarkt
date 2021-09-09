@@ -59,7 +59,11 @@ t_from = now - datetime.timedelta(hours=4)
 t_to = now
 
 # Results will be summarised at one hour readings
-period = PT1H
+period = "PT1H"
+
+# Round times to start of period boundary
+t_from = resource.round(t_from, period)
+t_to = resource.round(t_to, period)
 
 rdgs = resource.get_readings(t_from, t_to, period)
 for r in rdgs:
@@ -68,6 +72,9 @@ for r in rdgs:
         r[1]
     ))
 ```
+
+Timezones are managed according to t_from and t_to.  If you want to use GMT
+timezone, make sure t_from and t_to are set to use that timezone.
 
 ### Tariff
 
