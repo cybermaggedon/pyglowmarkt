@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyglowmarkt",
-    version="0.3",
+    version="0.4",
     author="Cybermaggedon",
     author_email="mark@cyberapocalypse.co.uk",
     description="Python API for accessing Hildebrand/Glowmarkt/Bright API to smart meter data",
@@ -19,7 +19,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    download_url = "https://github.com/cybermaggedon/pyglowmarkt/archive/refs/tags/v0.3.tar.gz",
+    download_url = "https://github.com/cybermaggedon/pyglowmarkt/archive/refs/tags/v0.4.tar.gz",
     install_requires=[
         "requests",
     ],
