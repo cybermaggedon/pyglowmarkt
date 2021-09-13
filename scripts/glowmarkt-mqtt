@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+
+from glowmarkt import *
+import datetime
+import sys
+import paho.mqtt.client as mqtt 
+import argparse
+
+try:
+
+    parser = argparse.ArgumentParser(
+        description=__doc__
+    )
+    parser.add_argument('--username', '-u',
+                        required=True,
+                        help="Bright account username")
+    parser.add_argument('--password', '-p',
+                        required=True,
+                        help="Bright account password")
+    parser.add_argument('--classifier', '-c',
+                        default="electricity.consumption",
+                        help="Resource classifier to use (default: electricity.consumption)")
+    parser.add_argument('--mqtt-hostname', '--host',
+                        default="localhost",
+                        help="MQTT hostname (default: localhost)")
+    parser.add_argument('--mqtt-username', '-U',
+                        help="MQTT username")
+    parser.add_argument('--mqtt-password', '-P',
+                        help="MQTT password")
+    parser.add_argument('--topic', '-t',
+                        default="glowmarkt/consumption",
+                        help="MQTT topic to publish to (default: glowmarkt/consumption)")
+
+    # Parse arguments
+    args = parser.parse_args(sys.argv[1:])
+
+    cli = BrightClient(args.username, args.password)
+    ents = cli.get_virtual_entities()
+
+    pub = mqtt.Client()
+
+    if args.mqtt_username or args.mqtt_password:
+        pub.username_pw_set(args.mqtt_username, args.mqtt_password)
+
+    pub.connect(args.mqtt_hostname)
+
+    rows = []
+
+    for ent in ents:
+
+        for res in ent.get_resources():
+
+            if res.classifier != args.classifier:
+                continue
+
+            # Work out period from start of day to now.
+            now = datetime.datetime.now().astimezone()
+            t_to = res.round(now, "PT30M")
+            t_from = t_to.replace(second=0, microsecond=0, minute=0, hour=0)
+
+            rdgs = res.get_readings(t_from, t_to, "PT30M")
+
+            tot = 0
+            for r in rdgs:
+                tot += r[1].value
+
+            msgi = pub.publish(args.topic, tot)
+            msgi.wait_for_publish()
+
+except Exception as e:
+    print(e)
+

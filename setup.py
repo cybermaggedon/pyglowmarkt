@@ -21,11 +21,12 @@ setuptools.setup(
     python_requires='>=3.6',
     download_url = "https://github.com/cybermaggedon/pyglowmarkt/archive/refs/tags/v0.4.tar.gz",
     install_requires=[
-        "requests",
+        "requests", "paho"
     ],
     scripts=[
         "scripts/glowmarkt-dump",
         "scripts/glowmarkt-csv",
         "scripts/glowmarkt-today",
+        "scripts/glowmarkt-mqtt",
     ]
 )
