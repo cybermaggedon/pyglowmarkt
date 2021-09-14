@@ -6,6 +6,9 @@
 Python API to the Bright/Glowmarkt/Hildebrand API for energy consumption.
 There is a python API and a command-line script.
 
+For instructions on use with Home Assistant, see
+https://github.com/danmed/Glow2MQTT
+
 ## Install
 
 ```
@@ -224,3 +227,47 @@ $ scripts/glowmarkt-today  -u 'username@example.org' -p 'p4ssw0rd' \
     -c electricity.consumption
 3.998
 ```
+
+### `glowmarkt-mqtt`
+
+Gets cumulative consumption for today (since midnight local time) and pushes
+the value to an MQTT topic.
+
+Accesses the readings for all resources with a particular classifier
+and writes out readings in CSV format.  Would be used with e.g.
+- `electricity.consumption`
+- `electricity.consumption.cost`
+- `gas.consumption`
+- `gas.consumption.cost`
+
+```
+usage: glowmarkt-mqtt [-h] --username USERNAME --password PASSWORD
+                      [--classifier CLASSIFIER]
+                      [--mqtt-hostname MQTT_HOSTNAME]
+                      [--mqtt-username MQTT_USERNAME]
+                      [--mqtt-password MQTT_PASSWORD] [--topic TOPIC]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --username USERNAME, -u USERNAME
+                        Bright account username
+  --password PASSWORD, -p PASSWORD
+                        Bright account password
+  --classifier CLASSIFIER, -c CLASSIFIER
+                        Resource classifier to use (default:
+                        electricity.consumption)
+  --mqtt-hostname MQTT_HOSTNAME, --host MQTT_HOSTNAME
+                        MQTT hostname (default: localhost)
+  --mqtt-username MQTT_USERNAME, -U MQTT_USERNAME
+                        MQTT username
+  --mqtt-password MQTT_PASSWORD, -P MQTT_PASSWORD
+                        MQTT password
+  --topic TOPIC, -t TOPIC
+                        MQTT topic to publish to (default:
+                        glowmarkt/consumption)
+```
+
+Simple test:
+- Assume Mosquitto is running (or just run `mosquitto`).
+- Run a subscriber: `mosquitto_sub -t glowmarkt/consumption`
+- Publish a reading: `glowmarkt-mqtt -u USER -p PASSWORD`
