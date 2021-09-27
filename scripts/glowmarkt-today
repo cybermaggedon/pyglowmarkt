@@ -19,6 +19,10 @@ try:
     parser.add_argument('--classifier', '-c',
                         default="electricity.consumption",
                         help="Resource classifier to use (default: electricity.consumption)")
+    parser.add_argument('--add-standing-charge', '-S',
+                        action="store_const",
+                        const=True,
+                        help="Add tariff standing charge to value.")
 
     # Parse arguments
     args = parser.parse_args(sys.argv[1:])
@@ -45,6 +49,10 @@ try:
             tot = 0
             for r in rdgs:
                 tot += r[1].value
+
+            if args.add_standing_charge:
+                tar = res.get_tariff()
+                tot += tar.current_rates.standing_charge.value
 
             print(tot)
             
