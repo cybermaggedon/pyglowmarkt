@@ -182,7 +182,7 @@ class BrightClient:
         # rounded to the near thing...
         if period == "PT1M":
             when = when.replace(second=0, microsecond=0)
-        if period == "PT30M":
+        elif period == "PT30M":
             when = when.replace(minute=int(when.minute / 30),
                                 second=0,
                                 microsecond=0)
