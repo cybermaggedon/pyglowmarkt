@@ -35,7 +35,7 @@ class Unknown:
     def __init__(self, value):
         self.value = value
     def __str__(self):
-        return "%s" % self.valu
+        return "%s" % self.value
     def unit(self):
         return "unknown"
 
