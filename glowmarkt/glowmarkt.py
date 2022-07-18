@@ -82,7 +82,7 @@ class BrightClient:
             "password": self.password
         }
 
-        url = self.url + "auth"
+        url = f"{self.url}auth"
 
         resp = self.session.post(url, headers=headers, data=json.dumps(data))
 
@@ -107,7 +107,7 @@ class BrightClient:
             "token": self.token
         }
 
-        url = self.url + "virtualentity"
+        url = f"{self.url}virtualentity"
 
         resp = self.session.get(url, headers=headers)
 
@@ -150,7 +150,7 @@ class BrightClient:
             "token": self.token
         }
 
-        url = self.url + "virtualentity/" + ve + "/resources"
+        url = f"{self.url}virtualentity/{ve}/resources"
 
         resp = self.session.get(url, headers=headers)
 
@@ -241,7 +241,7 @@ class BrightClient:
             "function": func,
         }
 
-        url = self.url + "resource/" + resource + "/readings"
+        url = f"{self.url}resource/{resource}/readings"
 
         resp = self.session.get(url, headers=headers, params=params)
 
@@ -275,7 +275,7 @@ class BrightClient:
 
         utc = datetime.timezone.utc
 
-        url = self.url + "resource/" + resource + "/current"
+        url = f"{self.url}resource/{resource}/current"
 
         resp = self.session.get(url, headers=headers)
 
@@ -312,7 +312,7 @@ class BrightClient:
             "token": self.token
         }
 
-        url = self.url + "resource/" + resource + "/catchup"
+        url = f"{self.url}resource/{resource}/catchup"
 
         resp = self.session.get(url, headers=headers)
 
@@ -337,7 +337,7 @@ class BrightClient:
 
         utc = datetime.timezone.utc
 
-        url = self.url + "resource/" + resource + "/meterread"
+        url = f"{self.url}resource/{resource}/meterread"
 
         resp = self.session.get(url, headers=headers)
 
@@ -369,7 +369,7 @@ class BrightClient:
             "token": self.token
         }
 
-        url = self.url + "resource/" + resource + "/tariff"
+        url = f"{self.url}resource/{resource}/tariff"
 
         resp = self.session.get(url, headers=headers)
 
