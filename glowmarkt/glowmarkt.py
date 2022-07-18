@@ -176,28 +176,76 @@ class BrightClient:
             
         return resources
 
+    def window(self, ago, period, num_periods):
+
+        now = datetime.datetime.now().astimezone()
+
+        t_from = now - datetime.timedelta(seconds=ago)
+        t_from = self.round(t_from, period)
+
+        if num_periods:
+            t_to = t_from + datetime.timedelta(
+                seconds=(num_periods * self.period_len(period))
+            )
+        else:
+            to_to = self.round(now, period)
+
+        t_to = self.round(t_to, period)
+
+        return t_from, t_to
+
+
+    def period_len(self, period):
+
+        return {
+            "PT1M": 60,
+            "PT30M": 30 * 60,
+            "PT1H": 60 * 60,
+            "P1D": 24 * 60 * 60,
+            "P1W": 7 * 24 * 60 * 60,
+            "P1M": 30 * 24 * 60 * 60,
+        }.get(period)
+
     def round(self, when, period):
 
         # Work out a rounding value.  Readings seem to be more accurate if
         # rounded to the near thing...
         if period == "PT1M":
+
+            # Nearest minute
             when = when.replace(second=0, microsecond=0)
+
         elif period == "PT30M":
-            when = when.replace(minute=int(when.minute / 30),
+
+            # Round to nearest half-hour.
+            when = when.replace(minute=30 * int(when.minute / 30),
                                 second=0,
                                 microsecond=0)
+
         elif period == "PT1H":
+
+            # Nearest hour
             when = when.replace(minute=0,
                                 second=0,
                                 microsecond=0)
+
         elif period == "P1D":
+
+            # Round to start of day.
             when = when.replace(hour=0, minute=0,
                                 second=0,
                                 microsecond=0)
+
         elif period == "P1W":
+
             when = when.replace(hour=0, minute=0,
                                 second=0,
                                 microsecond=0)
+
+            # 'Round' to Monday
+            while when.weekday() != 0:
+                when = when - datetime.timedelta(days=1)
+
         elif period == "P1M":
             when = when.replace(day=1, hour=0, minute=0,
                                 second=0,

@@ -22,7 +22,9 @@ try:
     parser.add_argument('--period', '-d',
                         default="PT30M",
                         help="Summary period (default: PT1H)")
-
+    parser.add_argument('--num-periods', '-n',
+                        default=0,
+                        help="Number of periods (default: all)")
 
     # Parse arguments
     args = parser.parse_args(sys.argv[1:])
@@ -30,14 +32,17 @@ try:
     cli = BrightClient(args.username, args.password)
     ents = cli.get_virtual_entities()
 
+    t_from, t_to = cli.window(
+        int(args.minutes) * 60, args.period, int(args.num_periods)
+    )
+
+#    print(t_from, t_from.weekday())
+#    print(t_to, t_to.weekday())
+
     for ent in ents:
         print("Entity:", ent.name)
         for res in ent.get_resources():
             print("  %s:" % res.name)
-
-            now = datetime.datetime.now().astimezone()
-            t_to = res.round(now, args.period)
-            t_from = t_to - datetime.timedelta(minutes=int(args.minutes))
 
             rdgs = res.get_readings(t_from, t_to, args.period)
             for r in rdgs:
