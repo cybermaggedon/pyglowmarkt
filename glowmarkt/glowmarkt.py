@@ -218,7 +218,10 @@ class BrightClient:
         utc = datetime.timezone.utc
 
         # Offset in minutes
-        offset = -t_from.utcoffset().seconds / 60
+        if t_from.utcoffset() is not None:
+            offset = -t_from.utcoffset().seconds / 60
+        else:
+            offset = 0
 
         def time_string(x):
             if isinstance(x, datetime.datetime):
