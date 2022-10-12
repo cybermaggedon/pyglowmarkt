@@ -2,7 +2,6 @@
 import requests
 import json
 import datetime
-import time
 
 PT1M = "PT1M"
 PT30M = "PT30M"
@@ -47,8 +46,8 @@ class Tariff:
     pass
 
 class Resource:
-    def get_readings(self, t_from, t_to, period, func="sum"):
-        return self.client.get_readings(self.id, t_from, t_to, period, func)
+    def get_readings(self, t_from, t_to, period, func="sum", nulls=False):
+        return self.client.get_readings(self.id, t_from, t_to, period, func, nulls)
     def get_current(self):
         return self.client.get_current(self.id)
     def get_meter_reading(self):
@@ -207,7 +206,7 @@ class BrightClient:
 
         return when
 
-    def get_readings(self, resource, t_from, t_to, period, func="sum"):
+    def get_readings(self, resource, t_from, t_to, period, func="sum", nulls=False):
 
         headers = {
             "Content-Type": "application/json",
@@ -217,19 +216,18 @@ class BrightClient:
 
         utc = datetime.timezone.utc
 
-        # Offset in minutes
-        offset = -t_from.utcoffset().seconds / 60
-
         def time_string(x):
+            """Converts a date or naive datetime instance to a timezone aware datetime instance in UTC and returns a time string in UTC. If its already timezone aware, it will still convert to UTC"""
             if isinstance(x, datetime.datetime):
-                x = x.replace(tzinfo=None)
-                return x.isoformat()
+                x = x.astimezone(utc)  # Converts local timezone with DST, or pre-specified timezones into UTC
+                return x.replace(tzinfo=None).isoformat()   # Remove TZ data without conversion (it's alreadu in UTC), then return ISO string format
             elif isinstance(x, datetime.date):
-                x = x.replace(tzinfo=None)
-                return x.isoformat()
+                x = datetime.datetime.combine(x, datetime.time()).astimezone(utc)   # Adds midnight time components (assumed in local timezone) and converts to UTC
+                return x.replace(tzinfo=None).isoformat()   # Would be similar to t_to.isoformat()[:19] where the +01:00 part is just truncated
             else:
                 raise RuntimeError("to_from/t_to should be date/datetime")
 
+        # Convert to UTC datetimes, conversion will handle tz/dst conversions
         t_from = time_string(t_from)
         t_to = time_string(t_to)
 
@@ -237,8 +235,9 @@ class BrightClient:
             "from": t_from,
             "to": t_to,
             "period": period,
-            "offset": offset,
+            "offset": 0,    # Enforce UTC server side, because we handle TZ/DST conversions client side
             "function": func,
+            "nulls": 1 if nulls else 0,     # nulls=1 will give None instead of Zero for missing data so its easy to discriminate between missing data or a genuine zero usage
         }
 
         url = f"{self.url}resource/{resource}/readings"
@@ -258,9 +257,9 @@ class BrightClient:
             cls = Unknown
 
         return [
-            [datetime.datetime.fromtimestamp(v[0] + 60 * offset).astimezone(),
+            [datetime.datetime.fromtimestamp(v[0], tz=utc).astimezone(),     # Timezone and DST aware datetime in local timezone converted from server side UTC
              cls(v[1])]
-            for v in resp["data"]
+            for v in resp["data"] if v[1] is not None   # v[1] is None when nulls=1 and no data exists, so it simply wont be included in the returned list
         ]
 
     def get_current(self, resource):
@@ -295,10 +294,10 @@ class BrightClient:
         else:
             cls = Unknown
 
-        print(datetime.datetime.fromtimestamp(resp["data"][0][0]))
+        print(datetime.datetime.fromtimestamp(resp["data"][0][0]), tz=utc).astimezone()
 
         return [
-            datetime.datetime.fromtimestamp(resp["data"][0][0]).astimezone(),
+            datetime.datetime.fromtimestamp(resp["data"][0][0], tz=utc).astimezone(),
             cls(resp["data"][0][1])
         ]
 
@@ -357,7 +356,7 @@ class BrightClient:
             cls = Unknown
 
         return [
-            [datetime.datetime.fromtimestamp(v[0], tz = utc), cls(v[1])]
+            [datetime.datetime.fromtimestamp(v[0], tz=utc).astimezone(), cls(v[1])]
             for v in resp["data"]
         ]
 
