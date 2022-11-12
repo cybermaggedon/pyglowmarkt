@@ -98,8 +98,6 @@ you would see if you go and look at the meter.
 I can't get these to work, maybe not implemented, or maybe only work with
 Glowmarkt hardware (I'm testing with a SMETS2 meter).
 
-I don't have a gas smart meter, maybe it would work, maybe not.
-
 ## Command line
 
 ### `glowmarkt-dump`
