@@ -18,7 +18,7 @@ class Pence:
     def __init__(self, value):
         self.value = value
     def __str__(self):
-        return "%.2f p" % self.value
+        return ("%s p" % self.value) if isinstance(self.value, str) else ("%.2f p" % self.value)
     def unit(self):
         return "pence"
 
@@ -26,7 +26,7 @@ class KWH:
     def __init__(self, value):
         self.value = value
     def __str__(self):
-        return "%.3f kWh" % self.value
+        return ("%s kWh" % self.value) if isinstance(self.value, str) else ("%.3f kWh" % self.value)
     def unit(self):
         return "kWh"
 
